@@ -5157,15 +5157,30 @@
             window.print();
         });
 
-        document.getElementById('btn-long-image').addEventListener('click', () => {
-            sendTelegramMessage("🖼️ Sanmaya just downloaded the special memory keepsake (Im.png)!");
-            const link = document.createElement('a');
-            link.href = "Im.png";
-            link.download = "My-Memories.png";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast("Memory keepsake downloaded! 🖼️💕");
+        document.getElementById('btn-long-image').addEventListener('click', async () => {
+            sendTelegramMessage("🖼️ Sanmaya is downloading the special memory keepsake (Im.png)!");
+            try {
+                const response = await fetch("Im.png");
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'My-Memories.png';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                showToast("Memory keepsake downloaded! 🖼️💕");
+            } catch (err) {
+                console.error("Force download failed, falling back:", err);
+                const link = document.createElement('a');
+                link.href = "Im.png";
+                link.download = "My-Memories.png";
+                link.target = "_blank";
+                link.click();
+                showToast("If it opens in a new tab, please right-click and 'Save Image As'! 📸");
+            }
         });
 
 
