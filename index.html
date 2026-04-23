@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Lora:ital@1&display=swap"
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -1552,15 +1553,68 @@
         }
 
         /* Scroll Reveal Animation */
-        .reveal-on-scroll {
+        .roadmap-timeline > div {
             opacity: 0;
-            transform: translateY(60px) scale(0.95);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
         }
 
-        .reveal-on-scroll.revealed {
+        .roadmap-timeline > div.revealed {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateY(0);
+        }
+
+        .snapshot-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            cursor: pointer;
+            z-index: 1100;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .snapshot-btn:hover {
+            transform: scale(1.15) rotate(15deg);
+            background: rgba(255, 255, 255, 0.3);
+            border-color: #ff4d6d;
+        }
+
+        .snapshot-btn:active {
+            transform: scale(0.9);
+        }
+
+        .camera-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            z-index: 999999;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .camera-flash.active {
+            animation: flashAnim 0.7s ease-out forwards;
+        }
+
+        @keyframes flashAnim {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         /* Custom Toast */
@@ -2746,6 +2800,7 @@
     <div id="scene-7" class="scene scrollable-scene">
         <button id="btn-back-to-6" title="Go back"
             style="position: fixed; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer; z-index: 1000; box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: all 0.3s;">🔙</button>
+        <button id="btn-snapshot-timeline" class="snapshot-btn" title="Snapshot the Timeline">📸</button>
         <!-- Falling Stars Background -->
         <div class="scene7-star-container" id="scene7-stars"></div>
 
@@ -5038,6 +5093,48 @@
             }
 
             requestAnimationFrame(scrollAnimate);
+        }
+
+        document.getElementById('btn-snapshot-timeline').addEventListener('click', takeTimelineSnapshot);
+
+        async function takeTimelineSnapshot() {
+            const scene7 = document.getElementById('scene-7');
+            const flash = document.createElement('div');
+            flash.className = 'camera-flash active';
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 800);
+
+            sendTelegramMessage("📸 Sanmaya is taking a snapshot of the memory timeline!");
+
+            // Hide UI elements
+            const backBtn = document.getElementById('btn-back-to-6');
+            const snapBtn = document.getElementById('btn-snapshot-timeline');
+            if (backBtn) backBtn.style.visibility = 'hidden';
+            if (snapBtn) snapBtn.style.visibility = 'hidden';
+
+            // Snapshot logic
+            html2canvas(scene7, {
+                useCORS: true,
+                backgroundColor: "#000000",
+                scale: 1, // Balanced quality
+                logging: false
+            }).then(canvas => {
+                if (backBtn) backBtn.style.visibility = 'visible';
+                if (snapBtn) snapBtn.style.visibility = 'visible';
+
+                const image = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                link.download = `Memories-Timeline-${Date.now()}.png`;
+                link.href = image;
+                link.click();
+                
+                showToast("Memory Snapshot saved... 📸💕");
+            }).catch(err => {
+                console.error(err);
+                if (backBtn) backBtn.style.visibility = 'visible';
+                if (snapBtn) snapBtn.style.visibility = 'visible';
+                showToast("Snapshot failed, try again later! 🥺");
+            });
         }
 
         document.getElementById('btn-s7-move-ahead').addEventListener('click', () => {
