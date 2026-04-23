@@ -5109,24 +5109,49 @@
             document.body.appendChild(flash);
             setTimeout(() => flash.remove(), 800);
 
-            sendTelegramMessage("📸 Sanmaya is attempting a snapshot of the memory timeline...");
+            sendTelegramMessage("📸 Sanmaya is attempting a snapshot... (Converting images for security)");
+            showToast("Preparing your memories... 📸");
 
-            // Hide UI elements
-            const backBtn = document.getElementById('btn-back-to-6');
-            const snapBtn = document.getElementById('btn-snapshot-timeline');
-            if (backBtn) backBtn.style.display = 'none';
-            if (snapBtn) snapBtn.style.display = 'none';
+            // Helper to convert images to Base64 (to bypass file:// protocol security)
+            const getBase64Image = (img) => {
+                return new Promise((resolve) => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL("image/png"));
+                });
+            };
 
-            // Wait a bit for UI to settle
-            setTimeout(() => {
-                html2canvas(timeline, {
+            const images = timeline.querySelectorAll('img');
+            const originalSrcs = [];
+
+            try {
+                // Pre-process images to Base64
+                for (let img of images) {
+                    originalSrcs.push({ img, src: img.src });
+                    if (img.complete && img.naturalWidth > 0) {
+                        img.src = await getBase64Image(img);
+                    }
+                }
+
+                // Hide UI elements
+                const backBtn = document.getElementById('btn-back-to-6');
+                const snapBtn = document.getElementById('btn-snapshot-timeline');
+                if (backBtn) backBtn.style.display = 'none';
+                if (snapBtn) snapBtn.style.display = 'none';
+
+                // Wait for Base64 to apply
+                await sleep(400);
+
+                const canvas = await html2canvas(timeline, {
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: "#000000",
                     scale: 2,
-                    logging: true, // Enable logging for debugging if needed in console
+                    logging: false,
                     onclone: (clonedDoc) => {
-                        // Ensure all nodes in the roadmap are visible in the clone
                         const nodes = clonedDoc.querySelectorAll('.timeline-node, .connector');
                         nodes.forEach(el => {
                             el.style.opacity = '1';
@@ -5140,24 +5165,27 @@
                             tw.style.opacity = '1';
                         });
                     }
-                }).then(canvas => {
-                    if (backBtn) backBtn.style.display = 'block';
-                    if (snapBtn) snapBtn.style.display = 'flex';
-
-                    const image = canvas.toDataURL("image/png");
-                    const link = document.createElement('a');
-                    link.download = `Memories-${Date.now()}.png`;
-                    link.href = image;
-                    link.click();
-                    
-                    showToast("Timeline captured successfully! 📸💕");
-                }).catch(err => {
-                    console.error("Snapshot Error:", err);
-                    if (backBtn) backBtn.style.display = 'block';
-                    if (snapBtn) snapBtn.style.display = 'flex';
-                    showToast("Snapshot failed. Try scrolling through first! 🥺");
                 });
-            }, 500);
+
+                // Success
+                const image = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                link.download = `Memories-${Date.now()}.png`;
+                link.href = image;
+                link.click();
+                showToast("Memory Snapshot saved! 📸💕");
+
+            } catch (err) {
+                console.error("Snapshot Error:", err);
+                showToast("Failed to process images. Try opening the roadmap first! 🥺");
+            } finally {
+                // Restore original images
+                originalSrcs.forEach(item => item.img.src = item.src);
+                const backBtn = document.getElementById('btn-back-to-6');
+                const snapBtn = document.getElementById('btn-snapshot-timeline');
+                if (backBtn) backBtn.style.display = 'block';
+                if (snapBtn) snapBtn.style.display = 'flex';
+            }
         }
 
         document.getElementById('btn-s7-move-ahead').addEventListener('click', () => {
