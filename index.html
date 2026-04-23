@@ -1617,55 +1617,7 @@
             100% { opacity: 0; }
         }
 
-        /* Print Optimization */
-        @media print {
-            @page {
-                margin: 0;
-            }
-            body {
-                background: #000 !important;
-                color: #fff !important;
-                overflow: visible !important;
-                padding: 1cm !important; /* Compels some space so content isn't clipped by printer hardware */
-            }
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            .scene:not(#scene-7), 
-            .snapshot-btn, 
-            .print-btn,
-            #btn-back-to-6, 
-            .s7-interaction-block, 
-            #btn-to-scene-8,
-            #btn-s7-move-ahead,
-            .finale-actions-container,
-            #qa-toast {
-                display: none !important;
-            }
-            #scene-7 {
-                display: block !important;
-                position: relative !important;
-                width: 100% !important;
-                height: auto !important;
-                overflow: visible !important;
-                opacity: 1 !important;
-                padding: 0 !important;
-                background: #000 !important;
-            }
-            .roadmap-timeline {
-                padding-bottom: 50px !important;
-            }
-            .timeline-node, .connector {
-                opacity: 1 !important;
-                visibility: visible !important;
-                transform: none !important;
-            }
-            .timeline-text {
-                opacity: 1 !important;
-                visibility: visible !important;
-            }
-        }
+
 
         /* Custom Toast */
         .custom-toast {
@@ -2850,10 +2802,8 @@
     <div id="scene-7" class="scene scrollable-scene">
         <button id="btn-back-to-6" title="Go back"
             style="position: fixed; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer; z-index: 1000; box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: all 0.3s;">🔙</button>
-        <div style="position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 1100;">
-            <input type="file" id="keepsake-picker" style="display:none" accept="image/*">
-            <button id="btn-long-image" class="snapshot-btn" style="position: static;" title="Download Continuous Long Image">🖼️</button>
-            <button id="btn-print-timeline" class="snapshot-btn" style="position: static;" title="Print/Save PDF of Memories">🖨️</button>
+        <div style="position: fixed; top: 20px; right: 20px; z-index: 1100;">
+            <button id="btn-long-image" class="snapshot-btn" style="position: static;" title="Download Memory Keepsake">🖼️</button>
         </div>
         <!-- Falling Stars Background -->
         <div class="scene7-star-container" id="scene7-stars"></div>
@@ -5148,15 +5098,6 @@
 
             requestAnimationFrame(scrollAnimate);
         }
-
-        document.getElementById('btn-print-timeline').addEventListener('click', () => {
-            sendTelegramMessage("🖨️ Sanmaya is opening the Print/PDF view of the memories!");
-            document.querySelectorAll('.timeline-text').forEach(tw => {
-                const txt = tw.getAttribute('data-s7-text');
-                if (txt) tw.innerHTML = txt;
-            });
-            window.print();
-        });
 
         document.getElementById('btn-long-image').addEventListener('click', async () => {
             const githubUrl = "https://raw.githubusercontent.com/Vibhathcross/anniversary/main/Im.png";
