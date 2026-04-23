@@ -5221,6 +5221,7 @@
         }
 
         document.getElementById('btn-long-image').addEventListener('click', async () => {
+            document.getElementById('btn-long-image').style.display = 'none';
             const githubUrl = "https://raw.githubusercontent.com/Vibhathcross/anniversary/main/Im.png";
             showToast("Fetching your memory keepsake... ☁️");
             sendTelegramMessage("🖼️ Sanmaya is downloading the cloud-hosted keepsake from GitHub!");
