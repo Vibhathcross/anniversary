@@ -1228,6 +1228,50 @@
             backdrop-filter: blur(5px);
         }
 
+        .find-treasures-text {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.4);
+            z-index: 25;
+            pointer-events: none;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .dark-download-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s;
+            opacity: 0;
+            z-index: 10;
+        }
+
+        .dark-room-item:hover .dark-download-btn {
+            opacity: 1;
+        }
+
+        .dark-download-btn:hover {
+            background: #ff4d6d;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255, 77, 109, 0.5);
+        }
+
         /* --- LOVE TIMER --- */
         .love-timer {
             position: absolute;
@@ -1553,13 +1597,13 @@
         }
 
         /* Scroll Reveal Animation */
-        .roadmap-timeline > div {
+        .roadmap-timeline>div {
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.8s ease-out;
         }
 
-        .roadmap-timeline > div.revealed {
+        .roadmap-timeline>div.revealed {
             opacity: 1;
             transform: translateY(0);
         }
@@ -1613,8 +1657,13 @@
         }
 
         @keyframes flashAnim {
-            0% { opacity: 1; }
-            100% { opacity: 0; }
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
         }
 
 
@@ -2495,6 +2544,7 @@
             border-color: rgba(217, 230, 255, 0.2);
             background: rgba(255, 255, 255, 0.1);
         }
+
         .typing-indicator {
             display: none;
             padding: 8px 12px;
@@ -2507,17 +2557,31 @@
             width: fit-content;
             align-self: flex-start;
         }
+
         .typing-indicator.show {
             display: flex;
             align-items: center;
             gap: 5px;
             animation: fadeInTyping 0.3s forwards;
         }
+
         @keyframes fadeInTyping {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .typing-dots { display: flex; gap: 3px; }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
         .typing-dot {
             width: 5px;
             height: 5px;
@@ -2525,26 +2589,46 @@
             border-radius: 50%;
             animation: typingDot 1.4s infinite;
         }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typingDot {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
         }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingDot {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+
         .sunrise-chatbox .typing-indicator {
             background: rgba(255, 255, 255, 0.4);
             color: #7f3f00;
         }
+
         .sunrise-chatbox .typing-dot {
             background: #7f3f00;
         }
+
         .moon-chatbox .typing-indicator {
             background: rgba(255, 255, 255, 0.1);
             color: #d9e6ff;
         }
+
         .moon-chatbox .typing-dot {
             background: #d9e6ff;
         }
+
         .dark-room-item.playing {
             transform: translate(-50%, -50%) scale(1.8) rotate(0deg) !important;
             z-index: 1000;
@@ -2643,7 +2727,13 @@
         </div>
         <div class="chat-history-container" id="chat-history-container">
         </div>
-        <div id="side-chat-typing" class="typing-indicator" style="margin-left: 12px;">He is typing<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>
+        <div id="side-chat-typing" class="typing-indicator" style="margin-left: 12px;">He is typing<div
+                class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
 
         <div class="side-chat-input-area">
             <div id="chat-emoji-picker" class="chat-emoji-picker">
@@ -2803,7 +2893,8 @@
         <button id="btn-back-to-6" title="Go back"
             style="position: fixed; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer; z-index: 1000; box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: all 0.3s;">🔙</button>
         <div style="position: fixed; top: 20px; right: 20px; z-index: 1100;">
-            <button id="btn-long-image" class="snapshot-btn" style="position: static;" title="Download Memory Keepsake">🖼️</button>
+            <button id="btn-long-image" class="snapshot-btn" style="position: static;"
+                title="Download Memory Keepsake">🖼️</button>
         </div>
         <!-- Falling Stars Background -->
         <div class="scene7-star-container" id="scene7-stars"></div>
@@ -3075,7 +3166,13 @@
             The sunrise conversation..💕
         </div>
         <div id="sunrise-chat-history"></div>
-        <div id="sunrise-chat-typing" class="typing-indicator" style="margin-left: 14px;">He is typing<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>
+        <div id="sunrise-chat-typing" class="typing-indicator" style="margin-left: 14px;">He is typing<div
+                class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
         <div id="sunrise-reply-preview"></div>
         <div class="chat-recommendations">
             <div class="rec-title">Try these magic words:</div>
@@ -3107,7 +3204,13 @@
             Moonlight whispers..🌙
         </div>
         <div id="moon-chat-history"></div>
-        <div id="moon-chat-typing" class="typing-indicator" style="margin-left: 14px;">He is typing<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>
+        <div id="moon-chat-typing" class="typing-indicator" style="margin-left: 14px;">He is typing<div
+                class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
         <div id="moon-reply-preview"></div>
         <div class="chat-recommendations">
             <div class="rec-title">Whisper these to the moon:</div>
@@ -3132,6 +3235,7 @@
     <!-- Integrated Moon Experience -->
 
     <div id="dark-room-overlay">
+        <div class="find-treasures-text">find the treasures</div>
         <div class="pointer-entity" id="dark-pointer"></div>
         <button id="btn-exit-dark-room">Exit the Dark Room 🚪</button>
         <div class="dark-room-content" id="dark-room-items">
@@ -3788,7 +3892,7 @@
                             const lowText = incomingText.toLowerCase().trim();
                             if (lowText === 'typing on' || lowText === 't on' || lowText === 'typing' || lowText === 't') {
                                 document.querySelectorAll('.typing-indicator').forEach(el => el.classList.add('show'));
-                                continue; 
+                                continue;
                             }
                             if (lowText === 'typing off' || lowText === 't off') {
                                 document.querySelectorAll('.typing-indicator').forEach(el => el.classList.remove('show'));
@@ -3891,12 +3995,12 @@
                 const addon = document.getElementById('scene-8-addon');
                 addon.classList.add('show');
                 s7.scrollTop = s7.scrollHeight; // Instant scroll
-                
+
                 revealScene8Words(); // Start the text
-                
+
                 const tryClickMoon = (attempts = 0) => {
                     const btn = document.getElementById('btn-open-moon-overlay');
-                    if (btn) { 
+                    if (btn) {
                         btn.style.display = 'inline-block'; // Ensure visible for the click
                         btn.click();
                         document.getElementById('scene-8-addon').classList.add('moon-mode');
@@ -3905,7 +4009,7 @@
                         setTimeout(() => tryClickMoon(attempts + 1), 200);
                     }
                 };
-                setTimeout(tryClickMoon, 500); 
+                setTimeout(tryClickMoon, 500);
                 return;
             }
 
@@ -4895,8 +4999,8 @@
 
             isScene6AnimDone = true;
             actions.style.display = 'flex';
-            setTimeout(() => { 
-                if (mySession === globalTypewriterSession) actions.style.opacity = 1; 
+            setTimeout(() => {
+                if (mySession === globalTypewriterSession) actions.style.opacity = 1;
             }, 50);
         }
 
@@ -5441,7 +5545,10 @@
             videos.forEach(src => {
                 const item = document.createElement('div');
                 item.className = 'dark-room-item';
-                item.innerHTML = `<video class="dark-video-player" src="${src}" loop controls></video>`;
+                item.innerHTML = `
+                    <video class="dark-video-player" src="${src}" loop controls></video>
+                    <a href="https://raw.githubusercontent.com/Vibhathcross/anniversary/main/${src}" download="${src}" class="dark-download-btn" title="Download Video">💾</a>
+                `;
                 allItems.push(item);
             });
 
@@ -5449,7 +5556,10 @@
             images.forEach(src => {
                 const item = document.createElement('div');
                 item.className = 'dark-room-item';
-                item.innerHTML = `<img src="${src}" class="dark-room-img">`;
+                item.innerHTML = `
+                    <img src="${src}" class="dark-room-img">
+                    <a href="https://raw.githubusercontent.com/Vibhathcross/anniversary/main/${src}" download="${src}" class="dark-download-btn" title="Download Image">💾</a>
+                `;
                 allItems.push(item);
             });
 
