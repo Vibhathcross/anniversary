@@ -2851,6 +2851,7 @@
         <button id="btn-back-to-6" title="Go back"
             style="position: fixed; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer; z-index: 1000; box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: all 0.3s;">🔙</button>
         <div style="position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 1100;">
+            <input type="file" id="keepsake-picker" style="display:none" accept="image/*">
             <button id="btn-long-image" class="snapshot-btn" style="position: static;" title="Download Continuous Long Image">🖼️</button>
             <button id="btn-print-timeline" class="snapshot-btn" style="position: static;" title="Print/Save PDF of Memories">🖨️</button>
         </div>
@@ -5158,42 +5159,24 @@
         });
 
         document.getElementById('btn-long-image').addEventListener('click', () => {
-            sendTelegramMessage("🖼️ Sanmaya is attempting to download the keepsake (Im.png)...");
-            const img = new Image();
-            img.onload = function() {
-                try {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    
-                    canvas.toBlob(function(blob) {
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'My-Memories.png';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        setTimeout(() => URL.revokeObjectURL(url), 1000);
-                        showToast("Memory keepsake downloaded! 🖼️💕");
-                    }, 'image/png');
-                } catch (e) {
-                    console.error("Canvas download failed:", e);
-                    // Last resort fallback
-                    const link = document.createElement('a');
-                    link.href = "Im.png";
-                    link.download = "My-Memories.png";
-                    link.target = "_blank";
-                    link.click();
-                    showToast("Please right-click the image and 'Save As'! 📸");
-                }
-            };
-            img.onerror = function() {
-                showToast("Error: Make sure 'Im.png' is in the project folder! 🥺");
-            };
-            img.src = "Im.png";
+            showToast("Click 'Open' and select Im.png to save it! 🖼️");
+            document.getElementById('keepsake-picker').click();
+        });
+
+        document.getElementById('keepsake-picker').addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                const url = URL.createObjectURL(file);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "My-Memories.png";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("Memories saved successfully! ❤️");
+                sendTelegramMessage("🖼️ Sanmaya successfully downloaded the memory keepsake via manual hand-off!");
+            }
         });
 
 
