@@ -5109,41 +5109,49 @@
             document.body.appendChild(flash);
             setTimeout(() => flash.remove(), 800);
 
-            sendTelegramMessage("📸 Sanmaya is attempting a snapshot... (Converting images for security)");
-            showToast("Preparing your memories... 📸");
+            sendTelegramMessage("📸 Sanmaya is attempting a snapshot...");
+            showToast("Capturing memories... 📸");
 
-            // Helper to convert images to Base64 (to bypass file:// protocol security)
             const getBase64Image = (img) => {
-                return new Promise((resolve) => {
-                    const canvas = document.createElement("canvas");
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL("image/png"));
+                return new Promise((resolve, reject) => {
+                    try {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas.toDataURL("image/png"));
+                    } catch (e) {
+                        reject(e);
+                    }
                 });
             };
 
             const images = timeline.querySelectorAll('img');
             const originalSrcs = [];
 
-            try {
-                // Pre-process images to Base64
-                for (let img of images) {
-                    originalSrcs.push({ img, src: img.src });
+            // Pre-process images individually
+            for (let img of images) {
+                originalSrcs.push({ img, src: img.src });
+                try {
                     if (img.complete && img.naturalWidth > 0) {
-                        img.src = await getBase64Image(img);
+                        const b64 = await getBase64Image(img);
+                        img.src = b64;
                     }
+                } catch (e) {
+                    // Skip failing images but don't stop the whole process
+                    console.warn("Skipping image processing for:", img.src, e);
                 }
+            }
 
+            try {
                 // Hide UI elements
                 const backBtn = document.getElementById('btn-back-to-6');
                 const snapBtn = document.getElementById('btn-snapshot-timeline');
                 if (backBtn) backBtn.style.display = 'none';
                 if (snapBtn) snapBtn.style.display = 'none';
 
-                // Wait for Base64 to apply
-                await sleep(400);
+                await sleep(500);
 
                 const canvas = await html2canvas(timeline, {
                     useCORS: true,
@@ -5151,6 +5159,8 @@
                     backgroundColor: "#000000",
                     scale: 2,
                     logging: false,
+                    imageTimeout: 0,
+                    removeContainer: true,
                     onclone: (clonedDoc) => {
                         const nodes = clonedDoc.querySelectorAll('.timeline-node, .connector');
                         nodes.forEach(el => {
@@ -5167,7 +5177,6 @@
                     }
                 });
 
-                // Success
                 const image = canvas.toDataURL("image/png");
                 const link = document.createElement('a');
                 link.download = `Memories-${Date.now()}.png`;
@@ -5176,8 +5185,8 @@
                 showToast("Memory Snapshot saved! 📸💕");
 
             } catch (err) {
-                console.error("Snapshot Error:", err);
-                showToast("Failed to process images. Try opening the roadmap first! 🥺");
+                console.error("Snapshot Final Error:", err);
+                showToast("Capture failed. Try scrolling through everything first! 🥺");
             } finally {
                 // Restore original images
                 originalSrcs.forEach(item => item.img.src = item.src);
