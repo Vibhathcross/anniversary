@@ -5224,15 +5224,7 @@
             }
         });
 
-            } finally {
-                // Restore original images
-                originalSrcs.forEach(item => item.img.src = item.src);
-                const backBtn = document.getElementById('btn-back-to-6');
-                const snapBtn = document.getElementById('btn-snapshot-timeline');
-                if (backBtn) backBtn.style.display = 'block';
-                if (snapBtn) snapBtn.style.display = 'flex';
-            }
-        }
+
 
         document.getElementById('btn-s7-move-ahead').addEventListener('click', () => {
             sendTelegramMessage("➡️ Sanmaya clicked 'move ahead' to Scene 8!");
