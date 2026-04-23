@@ -4555,9 +4555,26 @@
         }
 
         function switchScene(fromId, toId) {
-            globalTypewriterSession++; // Increment session to stop background animations
-            document.getElementById(fromId).classList.remove('active');
-            document.getElementById(toId).classList.add('active');
+            globalTypewriterSession++; // Stop any running animations
+            const f = document.getElementById(fromId);
+            const t = document.getElementById(toId);
+            if (f) f.classList.remove('active');
+            if (t) t.classList.add('active');
+
+            // --- NAVIGATION CONSISTENCY FOR SCENE 6 ---
+            // If we are moving back to Scene 6, ensure the finale buttons are visible
+            if (toId === 'scene-6') {
+                const actions = document.getElementById('finale-actions');
+                if (actions) {
+                    actions.style.display = 'flex';
+                    actions.style.opacity = '1';
+                }
+                const timer = document.getElementById('love-timer');
+                if (timer) {
+                    timer.style.display = 'flex';
+                    timer.style.opacity = '1';
+                }
+            }
         }
 
         function createStars() {
