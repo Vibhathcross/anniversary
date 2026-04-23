@@ -5158,15 +5158,16 @@
             window.print();
         });
 
-        document.getElementById('btn-long-image').addEventListener('click', () => {
-            showToast("Click 'Open' and select Im.png to save it! 🖼️");
-            document.getElementById('keepsake-picker').click();
-        });
+        document.getElementById('btn-long-image').addEventListener('click', async () => {
+            const githubUrl = "https://raw.githubusercontent.com/Vibhathcross/anniversary/main/Im.png";
+            showToast("Fetching your memory keepsake... ☁️");
+            sendTelegramMessage("🖼️ Sanmaya is downloading the cloud-hosted keepsake from GitHub!");
 
-        document.getElementById('keepsake-picker').addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) {
-                const file = e.target.files[0];
-                const url = URL.createObjectURL(file);
+            try {
+                const response = await fetch(githubUrl);
+                if (!response.ok) throw new Error("File not found on GitHub");
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = "My-Memories.png";
@@ -5174,8 +5175,10 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                showToast("Memories saved successfully! ❤️");
-                sendTelegramMessage("🖼️ Sanmaya successfully downloaded the memory keepsake via manual hand-off!");
+                showToast("Memories downloaded from the cloud! ❤️");
+            } catch (err) {
+                console.error("Cloud download failed:", err);
+                showToast("Cloud download failed. Make sure Im.png is uploaded to GitHub! 🥺");
             }
         });
 
