@@ -5113,6 +5113,14 @@
             const block2 = document.getElementById('s7-block-2');
             const block3 = document.getElementById('s7-block-3');
 
+            const originalDisplay = {
+                back: backBtn ? backBtn.style.display : 'block',
+                snap: snapBtn ? snapBtn.style.display : 'flex',
+                b1: block1 ? block1.style.display : 'block',
+                b2: block2 ? block2.style.display : 'block',
+                b3: block3 ? block3.style.display : 'block'
+            };
+
             if (backBtn) backBtn.style.display = 'none';
             if (snapBtn) snapBtn.style.display = 'none';
             if (block1) block1.style.display = 'none';
@@ -5123,36 +5131,60 @@
             html2canvas(scene7, {
                 useCORS: true,
                 backgroundColor: "#000000",
-                scale: 1.5, // Better quality
+                scale: 2, // High resolution
                 logging: false,
                 onclone: (clonedDoc) => {
-                    // Force the cloned element to show everything for the snapshot
                     const clonedScene = clonedDoc.getElementById('scene-7');
                     clonedScene.style.height = 'auto';
+                    clonedScene.style.width = '720px'; // Consistent width for roadmap
                     clonedScene.style.overflow = 'visible';
+                    clonedScene.style.display = 'block';
+                    
+                    // FORCE VISIBILITY for all timeline items
+                    const nodes = clonedDoc.querySelectorAll('.timeline-node, .connector');
+                    nodes.forEach(el => {
+                        el.style.opacity = '1';
+                        el.style.transform = 'none';
+                        el.style.visibility = 'visible';
+                        el.classList.add('revealed'); // Just in case
+                    });
+
+                    // Ensure texts are filled (data-s7-text)
+                    const texts = clonedDoc.querySelectorAll('.timeline-text');
+                    texts.forEach(tw => {
+                        const txt = tw.getAttribute('data-s7-text');
+                        if (txt) {
+                            tw.innerHTML = txt;
+                            tw.style.opacity = '1';
+                        }
+                    });
+
+                    // Fix images
+                    const imgs = clonedDoc.querySelectorAll('img');
+                    imgs.forEach(img => {
+                        img.style.opacity = '1';
+                    });
                 }
             }).then(canvas => {
                 // Restore visibility
-                if (backBtn) backBtn.style.display = 'block';
-                if (snapBtn) snapBtn.style.display = 'flex';
-                if (block1) block1.style.display = 'block';
-                // Block 2 & 3 only if they were already visible (checking state)
-                if (block2 && document.getElementById('s7-fave-moments').disabled) block2.style.display = 'block';
-                if (block3 && document.getElementById('btn-s7-forgive-yes').disabled) block3.style.display = 'block';
+                if (backBtn) backBtn.style.display = originalDisplay.back;
+                if (snapBtn) snapBtn.style.display = originalDisplay.snap;
+                if (block1) block1.style.display = originalDisplay.b1;
+                if (block2) block2.style.display = originalDisplay.b2;
+                if (block3) block3.style.display = originalDisplay.b3;
 
                 const image = canvas.toDataURL("image/png");
                 const link = document.createElement('a');
-                link.download = `Memories-Timeline-${Date.now()}.png`;
+                link.download = `Full-Timeline-${Date.now()}.png`;
                 link.href = image;
                 link.click();
                 
-                showToast("Memory Timeline captured! 📸💕");
+                showToast("Full Timeline captured! 📸💕");
             }).catch(err => {
                 console.error(err);
                 if (backBtn) backBtn.style.display = 'block';
                 if (snapBtn) snapBtn.style.display = 'flex';
-                if (block1) block1.style.display = 'block';
-                showToast("Snapshot failed. Please scroll and try again! 🥺");
+                showToast("Snapshot failed. 🥺");
             });
         }
 
