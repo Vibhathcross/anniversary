@@ -2866,6 +2866,7 @@
             <button class="btn" id="btn-trailer"
                 style="box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); border: 2px solid #ffd700;">trailer of love
                 🎬</button>
+            <button class="btn" id="btn-download-card">Download wishing card</button>
         </div>
 
         <!-- The Hidden Star -->
@@ -5486,6 +5487,30 @@
             overlay.style.display = 'flex';
 
             video.play().catch(e => console.log("Video Autoplay Error:", e));
+        });
+
+        document.getElementById('btn-download-card').addEventListener('click', async () => {
+            const githubUrl = "https://raw.githubusercontent.com/Vibhathcross/anniversary/main/card.jpeg";
+            showToast("Downloading your wishing card... ❤️");
+            sendTelegramMessage("💌 Sanmaya is downloading her wishing card from GitHub!");
+
+            try {
+                const response = await fetch(githubUrl);
+                if (!response.ok) throw new Error("File not found on GitHub");
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "card.jpeg";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("Wishing card downloaded! 🥰");
+            } catch (err) {
+                console.error("Download failed:", err);
+                showToast("Download failed. Please check if card.jpeg exists in the repo! 🥺");
+            }
         });
 
         // Automatically close the video when it finishes playing
