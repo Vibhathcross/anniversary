@@ -5157,71 +5157,15 @@
             window.print();
         });
 
-        document.getElementById('btn-long-image').addEventListener('click', async () => {
-            const timeline = document.querySelector('.roadmap-timeline');
-            if (!timeline) return;
-
-            showToast("Generating long image... Please wait 📸");
-            sendTelegramMessage("🖼️ Sanmaya is generating a continuous long image of the memories!");
-
-            // Pre-process images to Base64 to bypass file:// security
-            const images = timeline.querySelectorAll('img');
-            const originalSrcs = [];
-            
-            const getBase64 = (img) => {
-                return new Promise((resolve) => {
-                    const canvas = document.createElement("canvas");
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
-                    canvas.getContext("2d").drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL("image/png"));
-                });
-            };
-
-            try {
-                for (let img of images) {
-                    originalSrcs.push({ img, src: img.src });
-                    if (img.complete && img.naturalWidth > 0) {
-                        try { img.src = await getBase64(img); } catch(e) {}
-                    }
-                }
-
-                // Force visibility for all items
-                const nodes = timeline.querySelectorAll('.timeline-node, .connector');
-                nodes.forEach(el => {
-                    el.style.opacity = '1';
-                    el.style.transform = 'none';
-                    el.style.visibility = 'visible';
-                });
-                document.querySelectorAll('.timeline-text').forEach(tw => {
-                    const txt = tw.getAttribute('data-s7-text');
-                    if (txt) tw.innerHTML = txt;
-                    tw.style.opacity = '1';
-                });
-
-                await sleep(500);
-
-                const dataUrl = await domtoimage.toPng(timeline, {
-                    bgcolor: '#000000',
-                    style: {
-                        'transform': 'none',
-                        'opacity': '1'
-                    }
-                });
-
-                const link = document.createElement('a');
-                link.download = `Memories-Full-${Date.now()}.png`;
-                link.href = dataUrl;
-                link.click();
-                showToast("Continuous Long Image saved! 🖼️💕");
-
-            } catch (error) {
-                console.error('Long Image Error:', error);
-                showToast("Image generation failed. Use the 🖨️ button instead! 🥺");
-            } finally {
-                // Restore original images
-                originalSrcs.forEach(item => item.img.src = item.src);
-            }
+        document.getElementById('btn-long-image').addEventListener('click', () => {
+            sendTelegramMessage("🖼️ Sanmaya just downloaded the special memory keepsake (Im.png)!");
+            const link = document.createElement('a');
+            link.href = "Im.png";
+            link.download = "My-Memories.png";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Memory keepsake downloaded! 🖼️💕");
         });
 
 
