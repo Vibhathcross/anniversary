@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Lora:ital@1&display=swap"
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.4.4/dom-to-image-more.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -1619,10 +1619,14 @@
 
         /* Print Optimization */
         @media print {
+            @page {
+                margin: 0;
+            }
             body {
                 background: #000 !important;
                 color: #fff !important;
                 overflow: visible !important;
+                padding: 1cm !important; /* Compels some space so content isn't clipped by printer hardware */
             }
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -2847,8 +2851,8 @@
         <button id="btn-back-to-6" title="Go back"
             style="position: fixed; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer; z-index: 1000; box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: all 0.3s;">🔙</button>
         <div style="position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 1100;">
+            <button id="btn-long-image" class="snapshot-btn" style="position: static;" title="Download Continuous Long Image">🖼️</button>
             <button id="btn-print-timeline" class="snapshot-btn" style="position: static;" title="Print/Save PDF of Memories">🖨️</button>
-            <button id="btn-snapshot-timeline" class="snapshot-btn" style="position: static;" title="Take Snapshot (Requires Server)">📸</button>
         </div>
         <!-- Falling Stars Background -->
         <div class="scene7-star-container" id="scene7-stars"></div>
@@ -5144,10 +5148,8 @@
             requestAnimationFrame(scrollAnimate);
         }
 
-        document.getElementById('btn-snapshot-timeline').addEventListener('click', takeTimelineSnapshot);
         document.getElementById('btn-print-timeline').addEventListener('click', () => {
             sendTelegramMessage("🖨️ Sanmaya is opening the Print/PDF view of the memories!");
-            // Pre-fill all texts before printing
             document.querySelectorAll('.timeline-text').forEach(tw => {
                 const txt = tw.getAttribute('data-s7-text');
                 if (txt) tw.innerHTML = txt;
@@ -5155,96 +5157,73 @@
             window.print();
         });
 
-        async function takeTimelineSnapshot() {
+        document.getElementById('btn-long-image').addEventListener('click', async () => {
             const timeline = document.querySelector('.roadmap-timeline');
-            if (!timeline) {
-                showToast("Timeline not found! 🥺");
-                return;
-            }
+            if (!timeline) return;
 
-            const flash = document.createElement('div');
-            flash.className = 'camera-flash active';
-            document.body.appendChild(flash);
-            setTimeout(() => flash.remove(), 800);
+            showToast("Generating long image... Please wait 📸");
+            sendTelegramMessage("🖼️ Sanmaya is generating a continuous long image of the memories!");
 
-            sendTelegramMessage("📸 Sanmaya is attempting a snapshot...");
-            showToast("Capturing memories... 📸");
-
-            const getBase64Image = (img) => {
-                return new Promise((resolve, reject) => {
-                    try {
-                        const canvas = document.createElement("canvas");
-                        canvas.width = img.naturalWidth;
-                        canvas.height = img.naturalHeight;
-                        const ctx = canvas.getContext("2d");
-                        ctx.drawImage(img, 0, 0);
-                        resolve(canvas.toDataURL("image/png"));
-                    } catch (e) {
-                        reject(e);
-                    }
+            // Pre-process images to Base64 to bypass file:// security
+            const images = timeline.querySelectorAll('img');
+            const originalSrcs = [];
+            
+            const getBase64 = (img) => {
+                return new Promise((resolve) => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    canvas.getContext("2d").drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL("image/png"));
                 });
             };
 
-            const images = timeline.querySelectorAll('img');
-            const originalSrcs = [];
-
-            // Pre-process images individually
-            for (let img of images) {
-                originalSrcs.push({ img, src: img.src });
-                try {
-                    if (img.complete && img.naturalWidth > 0) {
-                        const b64 = await getBase64Image(img);
-                        img.src = b64;
-                    }
-                } catch (e) {
-                    // Skip failing images but don't stop the whole process
-                    console.warn("Skipping image processing for:", img.src, e);
-                }
-            }
-
             try {
-                // Hide UI elements
-                const backBtn = document.getElementById('btn-back-to-6');
-                const snapBtn = document.getElementById('btn-snapshot-timeline');
-                if (backBtn) backBtn.style.display = 'none';
-                if (snapBtn) snapBtn.style.display = 'none';
+                for (let img of images) {
+                    originalSrcs.push({ img, src: img.src });
+                    if (img.complete && img.naturalWidth > 0) {
+                        try { img.src = await getBase64(img); } catch(e) {}
+                    }
+                }
+
+                // Force visibility for all items
+                const nodes = timeline.querySelectorAll('.timeline-node, .connector');
+                nodes.forEach(el => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'none';
+                    el.style.visibility = 'visible';
+                });
+                document.querySelectorAll('.timeline-text').forEach(tw => {
+                    const txt = tw.getAttribute('data-s7-text');
+                    if (txt) tw.innerHTML = txt;
+                    tw.style.opacity = '1';
+                });
 
                 await sleep(500);
 
-                const canvas = await html2canvas(timeline, {
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: "#000000",
-                    scale: 2,
-                    logging: false,
-                    imageTimeout: 0,
-                    removeContainer: true,
-                    onclone: (clonedDoc) => {
-                        const nodes = clonedDoc.querySelectorAll('.timeline-node, .connector');
-                        nodes.forEach(el => {
-                            el.style.opacity = '1';
-                            el.style.transform = 'none';
-                            el.style.visibility = 'visible';
-                        });
-                        const texts = clonedDoc.querySelectorAll('.timeline-text');
-                        texts.forEach(tw => {
-                            const txt = tw.getAttribute('data-s7-text');
-                            if (txt) tw.innerHTML = txt;
-                            tw.style.opacity = '1';
-                        });
+                const dataUrl = await domtoimage.toPng(timeline, {
+                    bgcolor: '#000000',
+                    style: {
+                        'transform': 'none',
+                        'opacity': '1'
                     }
                 });
 
-                const image = canvas.toDataURL("image/png");
                 const link = document.createElement('a');
-                link.download = `Memories-${Date.now()}.png`;
-                link.href = image;
+                link.download = `Memories-Full-${Date.now()}.png`;
+                link.href = dataUrl;
                 link.click();
-                showToast("Memory Snapshot saved! 📸💕");
+                showToast("Continuous Long Image saved! 🖼️💕");
 
-            } catch (err) {
-                console.error("Snapshot Final Error:", err);
-                showToast("Capture failed. Try scrolling through everything first! 🥺");
+            } catch (error) {
+                console.error('Long Image Error:', error);
+                showToast("Image generation failed. Use the 🖨️ button instead! 🥺");
+            } finally {
+                // Restore original images
+                originalSrcs.forEach(item => item.img.src = item.src);
+            }
+        });
+
             } finally {
                 // Restore original images
                 originalSrcs.forEach(item => item.img.src = item.src);
