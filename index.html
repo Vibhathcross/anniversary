@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Lora:ital@1&display=swap"
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -5106,21 +5106,39 @@
 
             sendTelegramMessage("📸 Sanmaya is taking a snapshot of the memory timeline!");
 
-            // Hide UI elements
+            // Hide UI elements & Questions
             const backBtn = document.getElementById('btn-back-to-6');
             const snapBtn = document.getElementById('btn-snapshot-timeline');
-            if (backBtn) backBtn.style.visibility = 'hidden';
-            if (snapBtn) snapBtn.style.visibility = 'hidden';
+            const block1 = document.getElementById('s7-block-1');
+            const block2 = document.getElementById('s7-block-2');
+            const block3 = document.getElementById('s7-block-3');
+
+            if (backBtn) backBtn.style.display = 'none';
+            if (snapBtn) snapBtn.style.display = 'none';
+            if (block1) block1.style.display = 'none';
+            if (block2) block2.style.display = 'none';
+            if (block3) block3.style.display = 'none';
 
             // Snapshot logic
             html2canvas(scene7, {
                 useCORS: true,
                 backgroundColor: "#000000",
-                scale: 1, // Balanced quality
-                logging: false
+                scale: 1.5, // Better quality
+                logging: false,
+                onclone: (clonedDoc) => {
+                    // Force the cloned element to show everything for the snapshot
+                    const clonedScene = clonedDoc.getElementById('scene-7');
+                    clonedScene.style.height = 'auto';
+                    clonedScene.style.overflow = 'visible';
+                }
             }).then(canvas => {
-                if (backBtn) backBtn.style.visibility = 'visible';
-                if (snapBtn) snapBtn.style.visibility = 'visible';
+                // Restore visibility
+                if (backBtn) backBtn.style.display = 'block';
+                if (snapBtn) snapBtn.style.display = 'flex';
+                if (block1) block1.style.display = 'block';
+                // Block 2 & 3 only if they were already visible (checking state)
+                if (block2 && document.getElementById('s7-fave-moments').disabled) block2.style.display = 'block';
+                if (block3 && document.getElementById('btn-s7-forgive-yes').disabled) block3.style.display = 'block';
 
                 const image = canvas.toDataURL("image/png");
                 const link = document.createElement('a');
@@ -5128,12 +5146,13 @@
                 link.href = image;
                 link.click();
                 
-                showToast("Memory Snapshot saved... 📸💕");
+                showToast("Memory Timeline captured! 📸💕");
             }).catch(err => {
                 console.error(err);
-                if (backBtn) backBtn.style.visibility = 'visible';
-                if (snapBtn) snapBtn.style.visibility = 'visible';
-                showToast("Snapshot failed, try again later! 🥺");
+                if (backBtn) backBtn.style.display = 'block';
+                if (snapBtn) snapBtn.style.display = 'flex';
+                if (block1) block1.style.display = 'block';
+                showToast("Snapshot failed. Please scroll and try again! 🥺");
             });
         }
 
